@@ -10,6 +10,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"sync"
@@ -177,11 +178,11 @@ func purgeTags(ctx context.Context, acrClient api.AcrCLIClientInterface, loginUR
 	// GetTagsToDelete will return an empty lastTag when there are no more tags.
 	for {
 		tagsToDelete, newLastTag, newSkippedTagsCount, err := getTagsToDelete(ctx, acrClient, repoName, tagRegex, timeToCompare, lastTag, keep, skippedTagsCount)
-		lastTag = newLastTag
-		skippedTagsCount = newSkippedTagsCount
 		if err != nil {
 			return -1, err
 		}
+		lastTag = newLastTag
+        skippedTagsCount = newSkippedTagsCount
 		if tagsToDelete != nil {
 			for _, tag := range *tagsToDelete {
 				wg.Add(1)
@@ -310,29 +311,23 @@ func getTagsToDelete(ctx context.Context,
 }
 
 func getLastTagFromResponse(resultTags *acr.RepositoryTagsType) string {
-	newLastTag := ""
 	// The lastTag is updated to keep the for loop going.
-	if resultTags.Header != nil {
-		link := resultTags.Header.Get(linkHeader)
-		if len(link) > 0 {
-			queryString := strings.Split(link, "?")
-			if len(queryString) > 1 {
-				stripRel := strings.Split(queryString[1], ";")
-
-				queryParams := strings.Split(stripRel[0], "&")
-
-				for _, queryParam := range queryParams {
-					lastParam := strings.Split(queryParam, "last=")
-					if len(lastParam) > 1 {
-						newLastTag = lastParam[1]
-					}
-				}
-
-			}
-
-		}
+	if resultTags.Header == nil {
+		return ""
 	}
-	return newLastTag
+	link := resultTags.Header.Get(linkHeader)
+	if len(link) == 0 {
+		return ""
+	}
+	queryString := strings.Split(link, "?")
+	if len(queryString) <= 1 {
+		return ""
+	}
+	vals, err := url.ParseQuery(queryString[1])
+	if err != nil {
+		return ""
+	}
+	return vals.Get("last")
 }
 
 // purgeDanglingManifests deletes all manifests that do not have any tags associated with them.
