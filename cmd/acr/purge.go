@@ -323,7 +323,8 @@ func getLastTagFromResponse(resultTags *acr.RepositoryTagsType) string {
 	if len(queryString) <= 1 {
 		return ""
 	}
-	vals, err := url.ParseQuery(queryString[1])
+	queryStringToParse := strings.Split(queryString[1], ">")
+	vals, err := url.ParseQuery(queryStringToParse[0])
 	if err != nil {
 		return ""
 	}
@@ -452,12 +453,11 @@ func dryRunPurge(ctx context.Context, acrClient api.AcrCLIClientInterface, login
 	// The loop to get the deleted tags follows the same logic as the one in the purgeTags function
 	for {
 		tagsToDelete, newLastTag, newSkippedTagsCount, err := getTagsToDelete(ctx, acrClient, repoName, regex, timeToCompare, lastTag,  keep, skippedTagsCount)
-		lastTag = newLastTag
-		skippedTagsCount = newSkippedTagsCount
 		if err != nil {
 			return -1, -1, err
 		}
-
+		lastTag = newLastTag
+		skippedTagsCount = newSkippedTagsCount
 		if tagsToDelete != nil {
 			for _, tag := range *tagsToDelete {
 				// For every tag that would be deleted first check if it exists in the map, if it doesn't add a new key

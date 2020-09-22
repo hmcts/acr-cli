@@ -750,7 +750,7 @@ var (
 		Response: autorest.Response{
 			Response: &http.Response{
 				StatusCode: 200,
-				Header:     http.Header{linkHeader: {"/acr/v1/&testRepo/_tags?last=latest&n=3&orderby=timedesc rel=\"next\""}},
+				Header:     http.Header{linkHeader: {"</acr/v1/&testRepo/_tags?last=latest&n=3&orderby=timedesc>; rel=\"next\""}},
 			},
 		},
 		Registry:  &testLoginURL,
@@ -769,7 +769,7 @@ var (
 		Response: autorest.Response{
 			Response: &http.Response{
 				StatusCode: 200,
-				Header:     http.Header{linkHeader: {"/acr/v1/&testRepo/_tags?last=123%26latest&n=3&orderby=timedesc rel=\"next\""}},
+				Header:     http.Header{linkHeader: {"</acr/v1/&testRepo/_tags?last=123%26latest&n=3&orderby=>; rel=\"next\""}},
 			},
 		},
 		Registry:  &testLoginURL,
@@ -788,7 +788,7 @@ var (
 		Response: autorest.Response{
 			Response: &http.Response{
 				StatusCode: 200,
-				Header:     http.Header{linkHeader: {"/acr/v1/&testRepo/_tags?last=123%26latest&n=3&orderby=timedesc rel=\"next\""}},
+				Header:     http.Header{linkHeader: {"</acr/v1/&testRepo/_tags?n=3&orderby=timedesc&last=123%26latest>; rel=\"next\""}},
 			},
 		},
 		Registry:  &testLoginURL,
